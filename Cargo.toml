@@ -1,0 +1,10 @@
+[package]
+name = "frfft"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rustfft = "6.2.0"
+
+[dev-dependencies]
+assert_approx_eq = "1.1.0"
