@@ -1,9 +1,9 @@
-use crate::util::iter::iter_into_slice;
-use std::sync::Arc;
-use rustfft::Fft;
 use crate::num::FrFftNum;
-use rustfft::{num_complex::Complex, FftPlanner};
+use crate::util::iter::iter_into_slice;
+use rustfft::Fft;
 use rustfft::FftNum;
+use rustfft::{num_complex::Complex, FftPlanner};
+use std::sync::Arc;
 
 pub struct Convolver<T: FftNum> {
     fft_conv: Arc<dyn Fft<T>>,

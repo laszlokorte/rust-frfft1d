@@ -1,8 +1,8 @@
-use rustfft::FftNum;
 use rustfft::num_traits::float::Float;
 use rustfft::num_traits::float::FloatConst;
 use rustfft::num_traits::identities::ConstOne;
 use rustfft::num_traits::identities::ConstZero;
+use rustfft::FftNum;
 
 pub trait FrFftNum:
     FftNum

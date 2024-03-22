@@ -1,9 +1,13 @@
 use crate::num::FrFftNum;
-use std::sync::Arc;
 use rustfft::num_complex::Complex;
 use rustfft::Fft;
+use std::sync::Arc;
 
-pub fn preprocess<T: FrFftNum + std::convert::From<f32>>(fft: &Arc<dyn Fft<T>>, frac: &mut [Complex<T>], fraction: f32) -> (T, Option<T>) {
+pub fn preprocess<T: FrFftNum + std::convert::From<f32>>(
+    fft: &Arc<dyn Fft<T>>,
+    frac: &mut [Complex<T>],
+    fraction: f32,
+) -> (T, Option<T>) {
     let n = frac.len();
     let f_n = n as f32;
     let mut a = (fraction + 4.0).rem_euclid(4.0);

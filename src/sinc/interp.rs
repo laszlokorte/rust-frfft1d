@@ -1,12 +1,12 @@
-use crate::sinc::sinc;
-use crate::sinc::ConstOne;
-use crate::num::FrFftNum;
-use rustfft::FftNum;
-use itertools::intersperse;
-use crate::sinc::Complex;
 use crate::conv::convolver::Convolver;
+use crate::num::FrFftNum;
+use crate::sinc::sinc;
+use crate::sinc::Complex;
+use crate::sinc::ConstOne;
 use crate::sinc::Float;
 use crate::sinc::FloatConst;
+use itertools::intersperse;
+use rustfft::FftNum;
 
 pub struct Interpolator<T: FftNum> {
     len: usize,

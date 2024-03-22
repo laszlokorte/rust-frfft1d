@@ -1,6 +1,4 @@
-pub mod faster;
 pub mod basic;
+pub mod faster;
 
-pub trait Strategy {
-
-}
+pub trait Strategy {}

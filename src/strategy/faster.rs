@@ -1,15 +1,15 @@
-use crate::symmetry::preprocess::preprocess;
-use crate::strategy::Strategy;
-use crate::conv::len::conv_length;
-use crate::util::iter::iter_into_slice;
-use crate::sinc::sinc;
-use std::sync::Arc;
-use rustfft::num_complex::Complex;
 use crate::conv::convolver::Convolver;
+use crate::conv::len::conv_length;
+use crate::num::FrFftNum;
+use crate::sinc::sinc;
+use crate::strategy::Strategy;
+use crate::symmetry::preprocess::preprocess;
+use crate::util::iter::iter_into_slice;
+use rustfft::num_complex::Complex;
 use rustfft::Fft;
 use rustfft::FftNum;
 use rustfft::FftPlanner;
-use crate::num::FrFftNum;
+use std::sync::Arc;
 
 pub struct FastFrft<T: FftNum> {
     fft_integer: Arc<dyn Fft<T>>,
@@ -21,9 +21,7 @@ pub struct FastFrft<T: FftNum> {
     h0: Vec<Complex<T>>,
 }
 
-impl<T: FrFftNum + std::convert::From<f32>> Strategy for FastFrft<T> {
-
-}
+impl<T: FrFftNum + std::convert::From<f32>> Strategy for FastFrft<T> {}
 
 impl<T: FrFftNum + std::convert::From<f32>> FastFrft<T> {
     pub fn new(length: usize) -> Self {
@@ -51,8 +49,8 @@ impl<T: FrFftNum + std::convert::From<f32>> FastFrft<T> {
         let scale = T::sqrt(self.process_internal(signal, fraction));
 
         for v in signal.iter_mut() {
-            v.re *= scale.into();
-            v.im *= scale.into();
+            v.re *= scale;
+            v.im *= scale;
         }
     }
 

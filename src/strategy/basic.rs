@@ -1,17 +1,16 @@
-use crate::symmetry::preprocess::preprocess;
-use crate::strategy::Strategy;
-use std::sync::Arc;
-use crate::util::iter::iter_into_slice;
-use crate::sinc::interp::Interpolator;
 use crate::conv::convolver::Convolver;
-use rustfft::FftNum;
 use crate::num::FrFftNum;
+use crate::sinc::interp::Interpolator;
+use crate::strategy::Strategy;
+use crate::symmetry::preprocess::preprocess;
+use crate::util::iter::iter_into_slice;
 use core::iter;
+use rustfft::FftNum;
+use std::sync::Arc;
 
 use rustfft::num_complex::Complex;
 use rustfft::Fft;
 use rustfft::FftPlanner;
-
 
 pub struct BasicFrft<T: FftNum> {
     fft_integer: Arc<dyn Fft<T>>,
@@ -20,9 +19,7 @@ pub struct BasicFrft<T: FftNum> {
     conv_res: Vec<Complex<T>>,
 }
 
-impl<T: FrFftNum + std::convert::From<f32>> Strategy for BasicFrft<T> {
-
-}
+impl<T: FrFftNum + std::convert::From<f32>> Strategy for BasicFrft<T> {}
 
 impl<T: FrFftNum + std::convert::From<f32>> BasicFrft<T> {
     pub fn new(length: usize) -> Self {
