@@ -22,7 +22,6 @@ pub fn preprocess<T: FrFftNum + std::convert::From<f32>>(
         return ((1.0 / f_n).into(), None);
     } else if a == 2.0 {
         frac.reverse();
-        frac.rotate_right(1);
 
         return (1.0.into(), None);
     } else if a == 3.0 {

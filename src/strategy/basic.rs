@@ -146,7 +146,7 @@ mod tests {
 
     #[test]
     fn frft_chirp() {
-        let frft = BasicFrft::new(16);
+        let frft = BasicFrft::<f32>::new(16);
         let (mut c1, mut c2) = frft.chirps(16, 1.3);
 
         assert_eq!(61, c1.clone().count());
@@ -157,10 +157,10 @@ mod tests {
         let l1 = c1.last().unwrap();
         let l2 = c2.last().unwrap();
 
-        let a1f = Complex::<f32>::new(-0.986_642_1, -0.16290265);
-        let a2f = Complex::<f32>::new(-0.91668974, -0.3995997);
-        let a1l = Complex::<f32>::new(-0.986_642_1, -0.16290265);
-        let a2l = Complex::<f32>::new(-0.91668974, -0.3995997);
+        let a1f = Complex::new(-0.986_642_1, -0.16290265);
+        let a2f = Complex::new(-0.91668974, -0.3995997);
+        let a1l = Complex::new(-0.986_642_1, -0.16290265);
+        let a2l = Complex::new(-0.91668974, -0.3995997);
 
         assert_approx_eq!(a1f.re, f1.re, 1e-4);
         assert_approx_eq!(a1f.im, f1.im, 1e-4);
@@ -175,10 +175,10 @@ mod tests {
 
     #[test]
     fn frft_interp() {
-        let mut frft = BasicFrft::new(16);
+        let mut frft = BasicFrft::<f32>::new(16);
 
         let signal = [
-            Complex::<f32>::new(1.0, 0.0),
+            Complex::new(1.0, 0.0),
             Complex::new(0.0, 0.0),
             Complex::new(0.0, 0.0),
             Complex::new(0.0, 0.0),
@@ -241,9 +241,9 @@ mod tests {
 
     #[test]
     fn frft_03() {
-        let mut frft = BasicFrft::new(16);
+        let mut frft = BasicFrft::<f32>::new(16);
         let mut signal = [
-            Complex::<f32>::new(1.0, 0.0),
+            Complex::new(1.0, 0.0),
             Complex::new(0.0, 0.0),
             Complex::new(0.0, 0.0),
             Complex::new(0.0, 0.0),

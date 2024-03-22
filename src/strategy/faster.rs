@@ -147,7 +147,7 @@ mod tests {
     fn frft2_0() {
         let mut frft = FastFrft::<f32>::new(4);
         let mut signal = [
-            Complex::<f32>::new(1.0, 0.0),
+            Complex::new(1.0, 0.0),
             Complex::new(0.0, 0.0),
             Complex::new(0.0, 0.0),
             Complex::new(0.0, 0.0),
