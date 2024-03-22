@@ -217,10 +217,10 @@ mod tests {
         ];
 
         let expected = [
-            Complex::new(0.5, 0.0),
             Complex::new(-0.5, 0.0),
             Complex::new(0.5, 0.0),
             Complex::new(-0.5, 0.0),
+            Complex::new(0.5, 0.0),
         ];
 
         frft.process_scaled(&mut signal, 3.0);

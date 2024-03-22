@@ -29,7 +29,6 @@ pub fn preprocess<T: FrFftNum + std::convert::From<f32>>(
         fft.process(frac);
         frac.rotate_right(n / 2);
         frac.reverse();
-        frac.rotate_right(1);
 
         return ((1.0 / f_n).into(), None);
     } else {
@@ -37,7 +36,6 @@ pub fn preprocess<T: FrFftNum + std::convert::From<f32>>(
 
         if a > 2.0 {
             frac.reverse();
-            frac.rotate_right(1);
             a -= 2.0;
         }
 
@@ -54,7 +52,6 @@ pub fn preprocess<T: FrFftNum + std::convert::From<f32>>(
 
             frac.rotate_right(n / 2);
             frac.reverse();
-            frac.rotate_right(1);
             fft.process(frac);
             frac.rotate_right(n / 2);
 
