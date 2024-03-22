@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+itertools = "0.12.1"
 rustfft = "6.2.0"
 
 [dev-dependencies]

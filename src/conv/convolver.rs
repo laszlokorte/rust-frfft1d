@@ -1,8 +1,8 @@
-use crate::iter_into_slice;
-use crate::Arc;
-use crate::Fft;
-use crate::FrFftNum;
-use crate::{Complex, FftPlanner};
+use crate::util::iter::iter_into_slice;
+use std::sync::Arc;
+use rustfft::Fft;
+use crate::num::FrFftNum;
+use rustfft::{num_complex::Complex, FftPlanner};
 use rustfft::FftNum;
 
 pub struct Convolver<T: FftNum> {
@@ -70,14 +70,4 @@ impl<T: FrFftNum + std::convert::From<f32>> Convolver<T> {
     pub fn fft(&self, signal: &mut [Complex<T>]) {
         self.fft_conv.process(signal);
     }
-}
-
-pub fn conv_length(a_size: usize, b_size: usize) -> usize {
-    let n = a_size + b_size - 1;
-
-    next_pow2(n)
-}
-
-fn next_pow2(n: usize) -> usize {
-    2 << f32::ceil(f32::log2(n as f32)) as usize
 }

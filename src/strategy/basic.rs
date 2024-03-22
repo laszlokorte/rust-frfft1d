@@ -1,86 +1,30 @@
-use crate::iter_into_slice;
-use crate::sinc_interp::Interpolator;
-use crate::Convolver;
-use crate::FftNum;
-use crate::FrFftNum;
+use crate::symmetry::preprocess::preprocess;
+use crate::strategy::Strategy;
+use std::sync::Arc;
+use crate::util::iter::iter_into_slice;
+use crate::sinc::interp::Interpolator;
+use crate::conv::convolver::Convolver;
+use rustfft::FftNum;
+use crate::num::FrFftNum;
 use core::iter;
 
-use crate::Complex;
-use crate::Fft;
-use crate::FftPlanner;
+use rustfft::num_complex::Complex;
+use rustfft::Fft;
+use rustfft::FftPlanner;
 
-use crate::Arc;
 
-/// Implementation based on the matlab code
-/// provided at https://nalag.cs.kuleuven.be/research/software/FRFT/
-/// https://nalag.cs.kuleuven.be/research/software/FRFT/frft.m
-///
-/// function Faf = frft(f, a)
-/// f = f(:);
-/// N = length(f);
-/// shft = rem((0:N-1)+fix(N/2),N)+1;
-/// sN = sqrt(N);
-/// a = mod(a,4);
-///
-/// % do special cases
-/// if (a==0), Faf = f; return; end;
-/// if (a==2), Faf = flipud(f); return; end;
-/// if (a==1), Faf(shft,1) = fft(f(shft))/sN; return; end
-/// if (a==3), Faf(shft,1) = ifft(f(shft))*sN; return; end
-///
-/// % reduce to interval 0.5 < a < 1.5
-/// if (a>2.0), a = a-2; f = flipud(f); end
-/// if (a>1.5), a = a-1; f(shft,1) = fft(f(shft))/sN; end
-/// if (a<0.5), a = a+1; f(shft,1) = ifft(f(shft))*sN; end
-///
-/// % the general case for 0.5 < a < 1.5
-/// alpha = a*pi/2;
-/// tana2 = tan(alpha/2);
-/// sina = sin(alpha);
-/// f = [zeros(N-1,1) ; interp(f) ; zeros(N-1,1)];
-///
-/// % chirp premultiplication
-/// chrp = exp(-i*pi/N*tana2/4*(-2*N+2:2*N-2)'.^2);
-/// f = chrp.*f;
-///
-/// % chirp convolution
-/// c = pi/N/sina/4;
-/// Faf = fconv(exp(i*c*(-(4*N-4):4*N-4)'.^2),f);
-/// Faf = Faf(4*N-3:8*N-7)*sqrt(c/pi);
-///
-/// % chirp post multiplication
-/// Faf = chrp.*Faf;
-///
-/// % normalizing constant
-/// Faf = exp(-i*(1-a)*pi/4)*Faf(N:2:end-N+1);
-///
-/// %%%%%%%%%%%%%%%%%%%%%%%%%
-/// function xint=interp(x)
-/// % sinc interpolation
-///
-/// N = length(x);
-/// y = zeros(2*N-1,1);
-/// y(1:2:2*N-1) = x;
-/// xint = fconv(y(1:2*N-1), sinc([-(2*N-3):(2*N-3)]'/2));
-/// xint = xint(2*N-2:end-2*N+3);
-///
-/// %%%%%%%%%%%%%%%%%%%%%%%%%
-/// function z = fconv(x,y)
-/// % convolution by fft
-///
-/// N = length([x(:);y(:)])-1;
-/// P = 2^nextpow2(N);
-/// z = ifft( fft(x,P) .* fft(y,P));
-/// z = z(1:N);
-
-pub struct Frft<T: FftNum> {
+pub struct BasicFrft<T: FftNum> {
     fft_integer: Arc<dyn Fft<T>>,
     interpolator: Interpolator<T>,
     convolver: Convolver<T>,
     conv_res: Vec<Complex<T>>,
 }
 
-impl<T: FrFftNum + std::convert::From<f32>> Frft<T> {
+impl<T: FrFftNum + std::convert::From<f32>> Strategy for BasicFrft<T> {
+
+}
+
+impl<T: FrFftNum + std::convert::From<f32>> BasicFrft<T> {
     pub fn new(length: usize) -> Self {
         let mut planner = FftPlanner::new();
         let fft_integer = planner.plan_fft_forward(length);
@@ -100,7 +44,7 @@ impl<T: FrFftNum + std::convert::From<f32>> Frft<T> {
     }
 }
 
-impl<T: FrFftNum + std::convert::From<f32>> Frft<T> {
+impl<T: FrFftNum + std::convert::From<f32>> BasicFrft<T> {
     pub fn process(&mut self, signal: &mut [Complex<T>], fraction: f32) {
         let _ = self.process_internal(signal, fraction);
     }
@@ -130,27 +74,18 @@ impl<T: FrFftNum + std::convert::From<f32>> Frft<T> {
         impl Iterator<Item = Complex<T>> + Clone,
         impl Iterator<Item = Complex<T>> + Clone,
     ) {
-        // alpha
-        // 2.0420352248333655
-        // tana2
-        // 1.6318516871287894
-        // sina
-        // 0.8910065241883679
-        // c
-        // 0.05509206036067469
         let f_n = (i_n as f32).into();
         let alpha = a * T::PI() / 2.0.into();
         let tana2 = T::tan(alpha / 2.0.into());
         let sina = T::sin(alpha);
         let c = T::PI() / f_n / sina / 4.0.into();
 
-        // chrp_a = exp(-i*pi/N*tana2/4*(-2*N+2:2*N-2)'.^2);
         let chirp_a = ((-2 * i_n + 2)..(2 * i_n - 1))
             .map(|x| (x as f32).into())
             .map(move |x: T| {
                 Complex::<T>::new(T::zero(), -T::PI() / f_n * tana2 / 4.0.into() * (x * x)).exp()
             });
-        // chirp_b = exp(i*c*(-(4*N-4):4*N-4)'.^2)
+
         let chirp_b = ((-4 * i_n + 4)..(4 * i_n - 3))
             .map(|x| (x as f32).into())
             .map(move |x: T| Complex::<T>::new(T::zero(), c * (x * x)).exp());
@@ -158,77 +93,14 @@ impl<T: FrFftNum + std::convert::From<f32>> Frft<T> {
         (chirp_a, chirp_b)
     }
 
-    fn preprocess(&self, frac: &mut [Complex<T>], fraction: f32) -> (T, Option<T>) {
-        let n = frac.len();
-        let f_n = n as f32;
-        let mut a = (fraction + 4.0).rem_euclid(4.0);
-
-        if a == 0.0 {
-            (1.0.into(), None)
-        } else if a == 1.0 {
-            frac.rotate_right(n / 2);
-            self.fft_integer.process(frac);
-            frac.rotate_right(n / 2);
-
-            return ((1.0 / f_n).into(), None);
-        } else if a == 2.0 {
-            frac.reverse();
-            frac.rotate_right(1);
-
-            return (1.0.into(), None);
-        } else if a == 3.0 {
-            frac.rotate_right(n / 2);
-            self.fft_integer.process(frac);
-            frac.rotate_right(n / 2);
-            frac.reverse();
-            frac.rotate_right(1);
-
-            return ((1.0 / f_n).into(), None);
-        } else {
-            let mut scale_factor = 1.0;
-
-            if a > 2.0 {
-                frac.reverse();
-                frac.rotate_right(1);
-                a -= 2.0;
-            }
-
-            if a > 1.5 {
-                a -= 1.0;
-                frac.rotate_right(n / 2);
-                self.fft_integer.process(frac);
-                frac.rotate_right(n / 2);
-
-                scale_factor /= f_n;
-            }
-            if a < 0.5 {
-                a += 1.0;
-
-                frac.rotate_right(n / 2);
-                frac.reverse();
-                frac.rotate_right(1);
-                self.fft_integer.process(frac);
-                frac.rotate_right(n / 2);
-
-                scale_factor *= f_n;
-            }
-
-            return (scale_factor.into(), Some(a.into()));
-        }
-    }
-
     fn process_internal(&mut self, frac: &mut [Complex<T>], fraction: f32) -> T {
         let n = frac.len();
         let i_n = n as i32;
         let f_n = (n as f32).into();
 
-        let (scale_factor, adjusted_a) = self.preprocess(frac, fraction);
+        let (scale_factor, adjusted_a) = preprocess(&self.fft_integer, frac, fraction);
 
         if let Some(a) = adjusted_a {
-            // % the general case for 0.5 < a < 1.5
-            // alpha = a*pi/2;
-            // tana2 = tan(alpha/2);
-            // sina = sin(alpha);
             let alpha = a * T::PI() / 2.0.into();
             let sina = T::sin(alpha);
             let c = T::PI() / f_n / sina / 4.0.into();
@@ -236,14 +108,12 @@ impl<T: FrFftNum + std::convert::From<f32>> Frft<T> {
 
             let (chirp_a, chirp_b) = self.chirps(i_n, a);
 
-            // exp(-i*(1-a)*pi/4)
             let normalizer = Complex::new(
                 T::zero(),
                 -(Into::<T>::into(1.0) - a) * T::PI() / 4.0.into(),
             )
             .exp();
 
-            // [zeros(N-1,1) ; interp(f) ; zeros(N-1,1)];
             let prepend_zeros = iter::repeat(Complex::<T>::default()).take(n - 1);
             let append_zeros = prepend_zeros.clone();
             let interped_f = self.interpolator.interp(frac.iter());
@@ -252,26 +122,16 @@ impl<T: FrFftNum + std::convert::From<f32>> Frft<T> {
                 .chain(interped_f.iter().cloned())
                 .chain(append_zeros);
 
-            // % chirp premultiplication
-            // f = chrp_a.*f;
             let f1 = chirp_a.clone().zip(padded_f).map(|(a, b)| a * b);
 
-            // % chirp convolution
-            // c = T::pi()/N/sina/4;
-            // Faf = fconv(chirp_b,f);
             self.convolver
                 .conv(chirp_b.clone(), f1.clone(), &mut self.conv_res);
             self.conv_res.rotate_right(1);
 
-            // Faf = Faf(4*N-3:8*N-7)*sqrt(c/pi);
             let f3 = self.conv_res.iter().skip(4 * n - 4);
 
-            // % chirp post multiplication
-            // Faf = chrp_a.*Faf;
             let f2 = f3.zip(chirp_a).map(|(a, b)| a * b);
 
-            // % normalizing constant
-            // Faf = exp(-i*(1-a)*pi/4)*Faf(N:2:end-N+1);
             iter_into_slice(f2.skip(n - 1).step_by(2).map(|z| z * normalizer), frac);
 
             return scale_factor * sqrt_c_pi;
@@ -283,13 +143,13 @@ impl<T: FrFftNum + std::convert::From<f32>> Frft<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::frft::Frft;
-    use crate::Complex;
+    use super::BasicFrft;
+    use super::Complex;
     use assert_approx_eq::assert_approx_eq;
 
     #[test]
     fn frft_chirp() {
-        let frft = Frft::new(16);
+        let frft = BasicFrft::new(16);
         let (mut c1, mut c2) = frft.chirps(16, 1.3);
 
         assert_eq!(61, c1.clone().count());
@@ -318,7 +178,7 @@ mod tests {
 
     #[test]
     fn frft_interp() {
-        let mut frft = Frft::new(16);
+        let mut frft = BasicFrft::new(16);
 
         let signal = [
             Complex::<f32>::new(1.0, 0.0),
@@ -384,7 +244,7 @@ mod tests {
 
     #[test]
     fn frft_03() {
-        let mut frft = Frft::new(16);
+        let mut frft = BasicFrft::new(16);
         let mut signal = [
             Complex::<f32>::new(1.0, 0.0),
             Complex::new(0.0, 0.0),

@@ -1,27 +1,18 @@
 use crate::sinc::sinc;
-use crate::ConstOne;
-use crate::FrFftNum;
+use crate::sinc::ConstOne;
+use crate::num::FrFftNum;
 use rustfft::FftNum;
-
-use crate::Complex;
-use crate::Convolver;
-use crate::Float;
-use crate::FloatConst;
+use itertools::intersperse;
+use crate::sinc::Complex;
+use crate::conv::convolver::Convolver;
+use crate::sinc::Float;
+use crate::sinc::FloatConst;
 
 pub struct Interpolator<T: FftNum> {
     len: usize,
     convolver: Convolver<T>,
     conv_result: Vec<Complex<T>>,
 }
-
-// matlab code:
-// function xint=interp(x)
-// % sinc interpolation
-// N = length(x);
-// y = zeros(2*N-1,1);
-// y(1:2:2*N-1) = x;
-// xint = fconv(y(1:2*N-1), sinc([-(2*N-3):(2*N-3)]'/2));
-// xint = xint(2*N-2:end-2*N+3);
 
 impl<
         T: FftNum + FloatConst + Float + std::default::Default + std::convert::From<f32> + ConstOne,
@@ -60,7 +51,7 @@ impl<T: FrFftNum + std::convert::From<f32>> Interpolator<T> {
         &'s mut self,
         signal: impl Iterator<Item = &'c Complex<T>> + Clone,
     ) -> &'s [Complex<T>] {
-        let interspersed = signal.clone().cloned().intersperse(Complex::default());
+        let interspersed = intersperse(signal.clone().cloned(), Complex::default());
 
         self.convolver.conv(
             interspersed,
@@ -70,35 +61,13 @@ impl<T: FrFftNum + std::convert::From<f32>> Interpolator<T> {
 
         &self.conv_result[Self::slice_range(self.len)]
     }
-
-    // expected python results
-    // sincinterp(np.array([1, 2, 3]) -> [1.         1.27323954 2.         2.97089227 3.        ]
-    // sincinterp(np.array([]) -> error
-    // sincinterp(np.array([1]) -> []
-    // sincinterp(np.array([1,2]) -> [1.         1.90985932 2.        ]
-    // sincinterp(np.array([1,1]) -> [1.         1.27323954 1.        ]
-    // sincinterp(np.array([0,0]) -> [0. 0. 0.]
-    // sincinterp(np.array([1,0]) -> [1.00000000e+00 6.36619772e-01 4.44089210e-17]
-    // sincinterp(np.array([0,1]) -> [8.88178420e-17 6.36619772e-01 1.00000000e+00]
-    // sincinterp(np.array([0,1,0]) -> [1.85037171e-17 6.36619772e-01 1.00000000e+00 6.36619772e-01 1.85037171e-17]
-    // sincinterp(np.array([1,1,1]) -> [1.         1.06103295 1.         1.06103295 1.        ]
-
-    // expected matlab results
-    // interp([1,2,3]) -> [1.0000,1.2732,2.0000,2.9709,3.0000]
-    // interp([]) -> error
-    // interp([0]) -> error
-    // interp([1,2]) -> [1.0000, 1.9099, 2.0000]
-    // interp([1,1]) -> [1.0000,1.2732, 1.0000]
-    // interp([0,0]) -> [0,0,0]
-    // interp([0,1,0]) -> [-5.5511e-17, 6.3662e-01, 1.0000e+00, 6.3662e-01, 1.3878e-17]
-    // interp([1,1,1]) -> [1.0000, 1.0610, 1.0000, 1.0610, 1.0000]
 }
 
 #[cfg(test)]
 mod tests {
 
-    use crate::sinc_interp::Interpolator;
-    use crate::Complex;
+    use crate::sinc::interp::Interpolator;
+    use crate::sinc::Complex;
     use assert_approx_eq::assert_approx_eq;
 
     #[test]

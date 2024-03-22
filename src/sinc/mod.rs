@@ -1,7 +1,10 @@
-use crate::Complex;
-use crate::Float;
-use crate::FloatConst;
+use rustfft::num_complex::Complex;
+use rustfft::num_traits::Float;
+use rustfft::num_traits::FloatConst;
+use rustfft::num_traits::ConstOne;
 use rustfft::FftNum;
+
+pub mod interp;
 
 pub fn sinc<T: FftNum + FloatConst + Float>(x: T) -> Complex<T> {
     if x == T::zero() {
