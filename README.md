@@ -17,6 +17,10 @@ Both have been translated to rust as `frfft1d::strategy::Basic` and `frfft1d::st
 ## Usage
 
 ```rust
+use frfft1d::strategy::FastFrft;
+
+use frfft1d::strategy::BasicFrft;
+
 // The Signal to be transformed.
 let mut signal = [
     Complex::new(1.0, 0.0),

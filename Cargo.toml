@@ -2,6 +2,7 @@
 name = "frfft1d"
 version = "0.1.0"
 edition = "2021"
+git="https://github.com/laszlokorte/rust-frfft1d"
 
 [dependencies]
 itertools = "0.12.1"
