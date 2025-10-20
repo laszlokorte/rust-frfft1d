@@ -1,7 +1,7 @@
 [package]
 name = "frfft1d"
 description = "This is an implementation of the one dimensional discrete fractional fourier transform."
-version = "0.2.0"
+version = "0.3.0"
 license = "MIT"
 authors = ["Laszlo Korte"]
 edition = "2021"
