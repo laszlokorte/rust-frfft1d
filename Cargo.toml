@@ -1,7 +1,7 @@
 [package]
 name = "frfft1d"
 description = "This is an implementation of the one dimensional discrete fractional fourier transform."
-version = "0.3.0"
+version = "0.4.0"
 license = "MIT"
 authors = ["Laszlo Korte"]
 edition = "2021"
@@ -10,6 +10,7 @@ repository ="https://github.com/laszlokorte/rust-frfft1d"
 [dependencies]
 itertools = "0.12.1"
 rustfft = "6.2.0"
+num-traits = "0.2.19"
 
 [dev-dependencies]
 assert_approx_eq = "1.1.0"

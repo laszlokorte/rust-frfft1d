@@ -1,7 +1,7 @@
+pub use num_traits::ConstOne;
+pub use num_traits::Float;
+pub use num_traits::FloatConst;
 pub use rustfft::num_complex::Complex;
-pub use rustfft::num_traits::ConstOne;
-pub use rustfft::num_traits::Float;
-pub use rustfft::num_traits::FloatConst;
 pub use rustfft::FftNum;
 
 pub mod interp;

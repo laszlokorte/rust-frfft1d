@@ -1,7 +1,7 @@
-pub use rustfft::num_traits::float::Float;
-pub use rustfft::num_traits::float::FloatConst;
-pub use rustfft::num_traits::identities::ConstOne;
-pub use rustfft::num_traits::identities::ConstZero;
+pub use num_traits::float::Float;
+pub use num_traits::float::FloatConst;
+pub use num_traits::identities::ConstOne;
+pub use num_traits::identities::ConstZero;
 pub use rustfft::FftNum;
 
 pub trait FrFftNum:
@@ -32,7 +32,7 @@ impl<
             + std::ops::MulAssign
             + std::ops::Mul<T>
             + std::ops::DivAssign
-            + rustfft::num_traits::ConstZero,
+            + ConstZero,
     > FrFftNum for T
 {
 }
