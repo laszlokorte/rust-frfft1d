@@ -1,8 +1,8 @@
-use rustfft::num_traits::float::Float;
-use rustfft::num_traits::float::FloatConst;
-use rustfft::num_traits::identities::ConstOne;
-use rustfft::num_traits::identities::ConstZero;
-use rustfft::FftNum;
+pub use rustfft::num_traits::float::Float;
+pub use rustfft::num_traits::float::FloatConst;
+pub use rustfft::num_traits::identities::ConstOne;
+pub use rustfft::num_traits::identities::ConstZero;
+pub use rustfft::FftNum;
 
 pub trait FrFftNum:
     FftNum
@@ -35,4 +35,22 @@ impl<
             + rustfft::num_traits::ConstZero,
     > FrFftNum for T
 {
+}
+
+#[cfg(test)]
+mod tests {
+
+    #[test]
+    fn frft_chirp() {
+        assert_eq!(5.0, is_fft_num(5.0));
+        assert_eq!(5.0, is_frfft_num(5.0));
+    }
+
+    fn is_frfft_num<T: super::FrFftNum>(n: T) -> T {
+        return n;
+    }
+
+    fn is_fft_num<T: super::FftNum>(n: T) -> T {
+        return n;
+    }
 }
