@@ -4,7 +4,6 @@ use crate::sinc::interp::Interpolator;
 use crate::strategy::Strategy;
 use crate::symmetry::preprocess::preprocess;
 use crate::util::iter::iter_into_slice;
-use core::iter;
 use rustfft::FftNum;
 use std::sync::Arc;
 
@@ -111,7 +110,7 @@ impl<T: FrFftNum + std::convert::From<f32>> BasicFrft<T> {
             )
             .exp();
 
-            let prepend_zeros = iter::repeat(Complex::<T>::default()).take(n - 1);
+            let prepend_zeros = std::iter::repeat_n(Complex::<T>::default(), n - 1);
             let append_zeros = prepend_zeros.clone();
             let interped_f = self.interpolator.interp(frac.iter());
 

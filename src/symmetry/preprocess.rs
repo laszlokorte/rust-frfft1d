@@ -19,18 +19,18 @@ pub fn preprocess<T: FrFftNum + std::convert::From<f32>>(
         fft.process(frac);
         frac.rotate_right(n / 2);
 
-        return ((1.0 / f_n).into(), None);
+        ((1.0 / f_n).into(), None)
     } else if a == 2.0 {
         frac.reverse();
 
-        return (1.0.into(), None);
+        (1.0.into(), None)
     } else if a == 3.0 {
         frac.rotate_right(n / 2);
         fft.process(frac);
         frac.rotate_right(n / 2);
         frac.reverse();
 
-        return ((1.0 / f_n).into(), None);
+        ((1.0 / f_n).into(), None)
     } else {
         let mut scale_factor = 1.0;
 
@@ -58,6 +58,6 @@ pub fn preprocess<T: FrFftNum + std::convert::From<f32>>(
             scale_factor *= f_n;
         }
 
-        return (scale_factor.into(), Some(a.into()));
+        (scale_factor.into(), Some(a.into()))
     }
 }

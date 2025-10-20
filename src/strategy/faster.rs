@@ -85,7 +85,7 @@ impl<T: FrFftNum + std::convert::From<f32>> FastFrft<T> {
             .map(move |x| (x as f32).into())
             .map(move |i: T| Into::<T>::into(2.0) * i)
             .map(move |x: T| x - (Into::<T>::into(2.0) * f_n - Into::<T>::into(3.0)))
-            .map(|x: T| (sinc(x) * Into::<T>::into(0.5)))
+            .map(|x: T| sinc(x) * Into::<T>::into(0.5))
     }
 
     fn process_internal(&mut self, frac: &mut [Complex<T>], fraction: f32) -> T {
