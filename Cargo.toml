@@ -1,6 +1,9 @@
 [package]
 name = "frfft1d"
+description = "This is an implementation of the one dimensional discrete fractional fourier transform."
 version = "0.1.0"
+license = "MIT"
+authors = ["Laszlo Korte"]
 edition = "2021"
 git="https://github.com/laszlokorte/rust-frfft1d"
 
